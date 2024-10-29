@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: devconnect
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USER}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          debug : true
+          auth: true
+          timeout: 5000 #5?
+          starttls:
+            enables: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+      timeout: 3000
+
+jwt:
+  secretKey: ${SECRETKEY}
+
+  access:
+    expiration: 1800000 # 30? (1000L(ms -> s) * 60L(s -> m) * 30L)
+    header: "Authorization"
+
+  refresh:
+    expiration: 1209600000 # 2? (1000L(ms -> s) * 60L(s -> m) * 60L(m -> h) * 24L(h -> ??) * 14(2?))
+    header: "Authorization-refresh"
+
+
+logging:
+  level:
+    org.hibernate.SQL: trace
+    org.hibernate.type.descriptor: trace
+    root: info
+    org.springframework.data.redis: trace
+
+springdoc:
+  swagger-ui:
+    path: /devconnect
+
+
+## ??? api key
+api:
+  key: ${API_KEY}
+
+
