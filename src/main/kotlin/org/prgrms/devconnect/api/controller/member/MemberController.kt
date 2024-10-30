@@ -36,14 +36,14 @@ class MemberController(
 
   @PostMapping("/signup")
   @Operation(summary = "회원 가입", description = "새로운 사용자를 등록합니다.")
-  fun createMember(@RequestBody dto: @Valid MemberCreateRequestDto): ResponseEntity<Void> {
+  fun createMember(@Valid @RequestBody dto: MemberCreateRequestDto): ResponseEntity<Void> {
     memberCommandService.createMember(dto)
     return ResponseEntity.status(HttpStatus.CREATED).build()
   }
 
   @PostMapping("/login")
   @Operation(summary = "로그인", description = "사용자 로그인 처리.")
-  fun login(@RequestBody dto: @Valid MemberLoginRequestDto) {
+  fun login(@Valid @RequestBody dto: MemberLoginRequestDto) {
     // 로그인 처리 로직
   }
 
@@ -58,7 +58,7 @@ class MemberController(
   @Operation(summary = "회원 정보 수정", description = "현재 회원의 정보를 수정합니다.")
   fun updateMember(
     @AuthenticationPrincipal member: Member,
-    @RequestBody dto: @Valid MemberUpdateRequestDto
+    @Valid @RequestBody dto: MemberUpdateRequestDto
   ): ResponseEntity<Void> {
     memberCommandService.updateMember(member.memberId!!, dto)
     return ResponseEntity.ok().build()

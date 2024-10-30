@@ -11,7 +11,7 @@ import org.prgrms.devconnect.domain.member.entity.constant.Interest
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 class MemberCreateRequestDto(
-  @field:Email(message = "유효한 이메일 형식을 입력하세요.")
+  @field:NotBlank(message = "유효한 이메일 형식을 입력하세요.")
   @Schema(description = "회원 이메일", required = true, example = "user@example.com")
   val email: String,
 
