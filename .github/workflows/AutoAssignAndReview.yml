@@ -11,5 +11,5 @@ jobs:
       - uses: hkusu/review-assign-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          assignees: ${{ github.actor }} # assign pull request author
-          reviewers: eundeang, leebs0521, j-ra1n, lecorn # if draft, assigned when draft is released
+          assignees: ${{ github.actor }}
+          reviewers: eundeang, j-ra1n
