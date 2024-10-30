@@ -11,52 +11,61 @@ import java.util.function.Consumer
 @Entity
 @Table(name = "member")
 class Member(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id")
-    var memberId: Long? = null,
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "member_id")
+  var memberId: Long? = null,
 
-    @Column(name = "email", length = 100)
-    var email: String,
+  @Column(name = "email", length = 100)
+  var email: String,
 
-    @Column(name = "password", length = 100)
-    var password: String,
+  @Column(name = "password", length = 100)
+  var password: String,
 
-    @Column(name = "nickname", length = 50)
-    var nickname: String,
+  @Column(name = "nickname", length = 50)
+  var nickname: String,
 
-    @Column(name = "job", length = 50)
-    var job: String,
+  @Column(name = "job", length = 50)
+  var job: String,
 
-    @Column(name = "affiliation", length = 100)
-    var affiliation: String,
+  @Column(name = "affiliation", length = 100)
+  var affiliation: String,
 
-    @Column(name = "career")
-    var career: Int,
+  @Column(name = "career")
+  var career: Int,
 
-    @Column(name = "self_introduction")
-    var selfIntroduction: String,
+  @Column(name = "self_introduction")
+  var selfIntroduction: String,
 
-    @Column(name = "blog_link", length = 100)
-    var blogLink: String,
+  @Column(name = "blog_link", length = 100)
+  var blogLink: String,
 
-    @Column(name = "github_link", length = 100)
-    var githubLink: String,
+  @Column(name = "github_link", length = 100)
+  var githubLink: String,
 
-    @Column(name = "interest", length = 100)
-    @Enumerated(value = EnumType.STRING)
-    var interest: Interest,
+  @Column(name = "interest", length = 100)
+  @Enumerated(value = EnumType.STRING)
+  var interest: Interest,
 
-    memberTechStacks: List<MemberTechStackMapping>
+  memberTechStacks: List<MemberTechStackMapping>
 ) : Timestamp() {
 
 
-  @OneToMany(mappedBy = "member", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+  @OneToMany(
+    mappedBy = "member",
+    cascade = [CascadeType.ALL],
+    orphanRemoval = true,
+    fetch = FetchType.LAZY
+  )
   val memberTechStacks: MutableList<MemberTechStackMapping> = ArrayList()
 
   init {
     if (memberTechStacks.isNotEmpty()) {
-      memberTechStacks.forEach(Consumer { memberTechStack: MemberTechStackMapping -> this.addTechStackMapping(memberTechStack) })
+      memberTechStacks.forEach(Consumer { memberTechStack: MemberTechStackMapping ->
+        this.addTechStackMapping(
+          memberTechStack
+        )
+      })
     }
   }
 
@@ -70,7 +79,30 @@ class Member(
     this.password = passwordEncoder.encode(this.password)
   }
 
-  fun updateFromDto(requestDto: MemberUpdateRequestDto) {
-    TODO("Not yet implemented")
+  fun updateFromDto(dto: MemberUpdateRequestDto) {
+    if (dto.nickname != this.nickname)
+      this.nickname = dto.nickname
+
+    if (dto.job != this.job)
+      this.job = dto.job
+
+    if (dto.affiliation != this.affiliation)
+      this.affiliation = dto.affiliation
+
+    if (dto.career != this.career)
+      this.career = dto.career
+
+    if (dto.selfIntroduction != this.selfIntroduction)
+      this.selfIntroduction = dto.selfIntroduction
+
+    if (dto.blogLink != this.blogLink)
+      this.blogLink = dto.blogLink
+
+    if (dto.githubLink != this.githubLink)
+      this.githubLink = dto.githubLink
+
+    if (dto.interest != this.interest)
+      this.interest = dto.interest
+
   }
 }

@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.prgrms.devconnect.common.auth.redis.RefreshToken
 import org.prgrms.devconnect.common.auth.redis.RefreshTokenRepository
+import org.prgrms.devconnect.common.exception.ExceptionCode
 import org.prgrms.devconnect.common.exception.ExceptionCode.*
 import org.prgrms.devconnect.common.exception.jwt.JwtException
 import org.prgrms.devconnect.common.exception.member.MemberException
@@ -22,23 +23,23 @@ import javax.crypto.spec.SecretKeySpec
 
 @Service
 class JwtService(
-    @Value("\${jwt.secretKey}")
-    private val secretKey: String,
+  @Value("\${jwt.secretKey}")
+  private val secretKey: String,
 
-    @Value("\${jwt.access.expiration}")
-    private val accessTokenExpirationPeriod: Long,
+  @Value("\${jwt.access.expiration}")
+  private val accessTokenExpirationPeriod: Long,
 
-    @Value("\${jwt.refresh.expiration}")
-    private val refreshTokenExpirationPeriod: Long,
+  @Value("\${jwt.refresh.expiration}")
+  private val refreshTokenExpirationPeriod: Long,
 
-    @Value("\${jwt.access.header}")
-    private val accessHeader: String,
+  @Value("\${jwt.access.header}")
+  private val accessHeader: String,
 
-    @Value("\${jwt.refresh.header}")
-    private val refreshHeader: String,
+  @Value("\${jwt.refresh.header}")
+  private val refreshHeader: String,
 
-    private val refreshTokenRepository: RefreshTokenRepository,
-    private val memberRepository: MemberRepository
+  private val refreshTokenRepository: RefreshTokenRepository,
+  private val memberRepository: MemberRepository
 ) {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -49,34 +50,36 @@ class JwtService(
 
   fun createAccessToken(username: String): String {
     return Jwts.builder()
-        .claim("username", username)
-        .claim("category", "AccessToken")
-        .issuedAt(Date(System.currentTimeMillis()))
-        .expiration(Date(System.currentTimeMillis() + accessTokenExpirationPeriod!!))
-        .signWith(getSecretKey())
-        .compact()
+      .claim("username", username)
+      .claim("category", "AccessToken")
+      .issuedAt(Date(System.currentTimeMillis()))
+      .expiration(Date(System.currentTimeMillis() + accessTokenExpirationPeriod!!))
+      .signWith(getSecretKey())
+      .compact()
   }
 
   fun createRefreshToken(username: String): String {
     val token: String = Jwts.builder()
-        .claim("username", username)
-        .claim("category", "RefreshToken")
-        .issuedAt(Date(System.currentTimeMillis()))
-        .expiration(Date(System.currentTimeMillis() + refreshTokenExpirationPeriod!!))
-        .signWith(getSecretKey())
-        .compact()
+      .claim("username", username)
+      .claim("category", "RefreshToken")
+      .issuedAt(Date(System.currentTimeMillis()))
+      .expiration(Date(System.currentTimeMillis() + refreshTokenExpirationPeriod!!))
+      .signWith(getSecretKey())
+      .compact()
 
     val refreshToken: RefreshToken = RefreshToken(
-        refreshToken = token,
-        userEmail = username
+      refreshToken = token,
+      userEmail = username
     )
 
     refreshTokenRepository.save(refreshToken)
     return token
   }
 
-  fun sendAccessAndRefreshToken(response: HttpServletResponse, accessToken: String,
-                                refreshToken: String) {
+  fun sendAccessAndRefreshToken(
+    response: HttpServletResponse, accessToken: String,
+    refreshToken: String
+  ) {
     response.status = HttpServletResponse.SC_OK
     setAccessTokenHeader(response, accessToken)
     setRefreshTokenCookie(response, refreshToken)
@@ -93,7 +96,7 @@ class JwtService(
 
   fun extractUsername(accessToken: String): String? {
     return getClaimsJws(accessToken).payload
-        .get("username", String::class.java)
+      .get("username", String::class.java)
   }
 
 
@@ -126,15 +129,15 @@ class JwtService(
 
   private fun getClaimsJws(token: String): Jws<Claims> {
     return Jwts.parser()
-        .verifyWith(getSecretKey())
-        .build()
-        .parseSignedClaims(token)
+      .verifyWith(getSecretKey())
+      .build()
+      .parseSignedClaims(token)
   }
 
   fun reIssueAccessToken(response: HttpServletResponse, refreshToken: String) {
     log.info("Access Token 재발급 시도: {}", refreshToken)
     val token: RefreshToken = refreshTokenRepository.findByRefreshToken(refreshToken)
-        ?: throw RefreshTokenException(NOT_FOUND_REFRESH_TOKEN)
+      ?: throw RefreshTokenException(NOT_FOUND_REFRESH_TOKEN)
 
     isTokenValid(refreshToken)
     val username: String = token.userEmail
@@ -145,6 +148,16 @@ class JwtService(
     val accessToken = createAccessToken(username)
     this.setAccessTokenHeader(response, accessToken)
     log.info("Access Token 재발급 성공")
+  }
+
+  fun deleteRefreshTokenByEmail(email: String) {
+    log.info("[REDIS] Refresh Token 삭제 시도: {}", email)
+
+    val token: RefreshToken = refreshTokenRepository.findByUserEmail(email)
+      ?: throw RefreshTokenException(NOT_FOUND_REFRESH_TOKEN)
+
+    refreshTokenRepository.delete(token)
+    log.info("[REDIS] Refresh Token 삭제 성공: {}", email)
   }
 
   companion object {
