@@ -12,5 +12,5 @@ import java.time.LocalDateTime
 abstract class Timestamp : CreateTimestamp() {
   @LastModifiedDate
   @Column(name = "updated_at")
-  private var updatedAt: LocalDateTime? = null
+  var updatedAt: LocalDateTime? = null
 }
