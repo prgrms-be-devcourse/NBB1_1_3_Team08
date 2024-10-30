@@ -56,7 +56,7 @@ class CommentController(
         @AuthenticationPrincipal member: Member,
         @RequestBody @Valid commentCreateRequestDto: CommentCreateRequestDto
     ): ResponseEntity<Void> {
-        commentCreateService.createComment(commentCreateRequestDto, member.memberId)
+        commentCreateService.createComment(commentCreateRequestDto, member.memberId!!)
         return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
