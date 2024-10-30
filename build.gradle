@@ -4,6 +4,7 @@ plugins {
     id 'org.springframework.boot' version '3.3.5'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
+    id 'org.jetbrains.kotlin.kapt' version '1.9.25' // QueryDSL 관련 설정과 버전 통일
 }
 
 group = 'org.prgrms'
@@ -20,6 +21,15 @@ repositories {
 }
 
 dependencies {
+    // QueryDSL 관련 의존성
+    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+    implementation("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    implementation("jakarta.persistence:jakarta.persistence-api")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+
+    kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
+    kapt("org.springframework.boot:spring-boot-configuration-processor")
+
     // JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
@@ -80,6 +90,9 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll '-Xjsr305=strict'
     }
+
+
+
 }
 
 allOpen {
@@ -90,4 +103,8 @@ allOpen {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+kapt {
+    correctErrorTypes = true
 }
