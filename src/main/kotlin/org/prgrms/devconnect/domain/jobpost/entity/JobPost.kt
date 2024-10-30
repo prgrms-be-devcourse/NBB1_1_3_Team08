@@ -69,7 +69,7 @@ class JobPost(
     @OneToMany(mappedBy = "jobPost", cascade = [CascadeType.PERSIST])
     var jobPostTechStackMappings: MutableList<JobPostTechStackMapping> = ArrayList(jobPostTechStackMappings)
 
-    // 연관관계 편의 메서드
+    // 연관관계 편의 메서드 
     fun addTechStackMapping(mapping: JobPostTechStackMapping) {
         jobPostTechStackMappings.add(mapping)
     }
