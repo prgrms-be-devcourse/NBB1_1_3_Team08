@@ -22,7 +22,7 @@ class CommentCreateService(
 
     // TODO 허은정 Alarm Regist Event AOP
 //    @RegisterPublisher
-    fun createComment(commentCreateRequestDto: CommentCreateRequestDto, memberId: Long?): Comment {
+    fun createComment(commentCreateRequestDto: CommentCreateRequestDto, memberId: Long): Comment {
         val member = memberQueryService.getMemberByIdOrThrow(memberId)
         val board = boardQueryService.getBoardByIdOrThrow(commentCreateRequestDto.boardId)
 
