@@ -3,6 +3,7 @@ package org.prgrms.devconnect.api.service.member
 import org.prgrms.devconnect.api.controller.member.dto.request.MemberCreateRequestDto
 import org.prgrms.devconnect.api.controller.member.dto.request.MemberUpdateRequestDto
 import org.prgrms.devconnect.api.service.techstack.TechStackQueryService
+import org.prgrms.devconnect.domain.alarm.aop.RegisterAlarmPublisher
 import org.prgrms.devconnect.domain.member.entity.Member
 import org.prgrms.devconnect.domain.member.entity.MemberTechStackMapping
 import org.prgrms.devconnect.domain.member.repository.MemberRepository
@@ -22,8 +23,9 @@ class MemberCommandService(
   private val memberQueryService: MemberQueryService,
 ) {
 
-  fun createMember(requestDto: MemberCreateRequestDto): Member {
-    memberQueryService.validateDuplicatedEmail(requestDto.email)
+    @RegisterAlarmPublisher
+    fun createMember(requestDto: MemberCreateRequestDto): Member {
+        memberQueryService.validateDuplicatedEmail(requestDto.email)
 
     val memberTechStacks = getTechStackMappings(requestDto.techStackIds)
     val member = requestDto.toEntity(memberTechStacks).apply {

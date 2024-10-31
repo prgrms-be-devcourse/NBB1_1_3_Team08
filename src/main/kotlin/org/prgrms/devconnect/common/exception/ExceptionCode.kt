@@ -7,6 +7,7 @@ enum class ExceptionCode(
   //Alarm Error
   NOT_FOUND_ALARM(404, "존재하지 않는 알람입니다."),
   EMPTY_ALARMS(400, "알림이 비어있습니다."),
+  METHOD_NOT_PROVIDE(403, "알림을 제공하지 않는 메소드입니다."),
 
   //Email Error
   EMAIL_SERVER_ERROR(500, "이메일을 전송하던 중에 오류가 발생했습니다."),

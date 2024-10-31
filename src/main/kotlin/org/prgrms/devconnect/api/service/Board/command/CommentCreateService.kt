@@ -6,6 +6,7 @@ import org.prgrms.devconnect.api.service.Board.query.CommentQueryService
 import org.prgrms.devconnect.api.service.member.MemberQueryService
 import org.prgrms.devconnect.common.exception.ExceptionCode
 import org.prgrms.devconnect.common.exception.board.CommentException
+import org.prgrms.devconnect.domain.alarm.aop.RegisterAlarmPublisher
 import org.prgrms.devconnect.domain.board.entity.Comment
 import org.prgrms.devconnect.domain.board.repository.CommentRepository
 import org.springframework.stereotype.Service
@@ -20,8 +21,7 @@ class CommentCreateService(
     private val commentQueryService: CommentQueryService
 ) {
 
-    // TODO 허은정 Alarm Regist Event AOP
-//    @RegisterPublisher
+    @RegisterAlarmPublisher
     fun createComment(commentCreateRequestDto: CommentCreateRequestDto, memberId: Long): Comment {
         val member = memberQueryService.getMemberByIdOrThrow(memberId)
         val board = boardQueryService.getBoardByIdOrThrow(commentCreateRequestDto.boardId)
