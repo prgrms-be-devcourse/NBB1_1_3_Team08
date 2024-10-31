@@ -12,6 +12,6 @@ import java.time.LocalDateTime
 abstract class CreateTimestamp {
   @CreatedDate
   @Column(name = "created_at", updatable = false)
-  private var createdAt: LocalDateTime? = null
+  var createdAt: LocalDateTime? = null
 
 }

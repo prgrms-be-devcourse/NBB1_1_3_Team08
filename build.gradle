@@ -90,6 +90,9 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll '-Xjsr305=strict'
     }
+
+
+
 }
 
 allOpen {
@@ -105,3 +108,4 @@ tasks.named('test') {
 kapt {
     correctErrorTypes = true
 }
+
