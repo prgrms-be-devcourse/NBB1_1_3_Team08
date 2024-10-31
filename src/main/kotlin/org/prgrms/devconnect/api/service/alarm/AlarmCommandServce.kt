@@ -5,8 +5,11 @@ import org.prgrms.devconnect.domain.alarm.entity.Alarm
 import org.prgrms.devconnect.domain.alarm.repository.AlarmRepository
 import org.prgrms.devconnect.domain.board.entity.Board
 import org.prgrms.devconnect.domain.board.entity.Comment
+import org.prgrms.devconnect.domain.interest.entity.InterestBoard
 import org.prgrms.devconnect.domain.member.entity.Member
 import org.springframework.stereotype.Service
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @Service
 @Transactional
@@ -68,7 +71,7 @@ class AlarmCommandService(
 
         val likedPage = ""
         val replyMessage: String =
-            parentCommenter.nickname + "님이 작성한 댓글 \"" + comment.parent!!.content + "\"에"++" 답글이 달렸어요!"
+            parentCommenter.nickname + "님이 작성한 댓글 \"" + comment.parent!!.content + "\"에 답글이 달렸어요!"
 
         val alarm = Alarm(
             alertText = replyMessage,
@@ -81,22 +84,22 @@ class AlarmCommandService(
         return alarm
     }
 
-//    fun createUrgentAlarmAboutInterestBoard(interestBoard: InterestBoard): Alarm {
-//        val member: Member = interestBoard.getMember()
-//        val board: Board = interestBoard.getBoard()
-//        val remainingDate = LocalDate.now().until(board.getEndDate().toLocalDate(), ChronoUnit.DAYS)
-//        val likedPage = ""
-//        val urgentMessage: String =
-//            (member.nickname + "님이 관심 표시한 " + board.getTitle()).toString() + "의 마감 기한까지" + remainingDate + "일 남았습니다. 얼른 지원해보세요!"
-//
-//        val alarm: Alarm = Alarm.builder()
-//            .member(member)
-//            .alertText(urgentMessage)
-//            .relatedUrl(likedPage)
-//            .build()
-//
-//        alarmRepository.save(alarm)
-//
-//        return alarm
-//    }
+    fun createUrgentAlarmAboutInterestBoard(interestBoard: InterestBoard): Alarm {
+        val member: Member = interestBoard.member
+        val board: Board = interestBoard.board
+        val remainingDate = LocalDate.now().until(board.endDate.toLocalDate(), ChronoUnit.DAYS)
+        val likedPage = ""
+        val urgentMessage: String =
+            member.nickname + "님이 관심 표시한 " + board.title + "의 마감 기한까지" + remainingDate + "일 남았습니다. 얼른 지원해보세요!"
+
+        val alarm: Alarm = Alarm(
+            member = member,
+            alertText = urgentMessage,
+            relatedUrl = likedPage
+        )
+
+        alarmRepository.save(alarm)
+
+        return alarm
+    }
 }
