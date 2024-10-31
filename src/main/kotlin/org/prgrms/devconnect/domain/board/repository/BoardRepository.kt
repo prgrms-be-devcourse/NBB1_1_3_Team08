@@ -14,23 +14,15 @@ import java.util.*
 
 @Repository
 interface BoardRepository : JpaRepository<Board, Long>, BoardRepositoryCustom {
-    @Query("SELECT b FROM Board b WHERE b.endDate < :currentDate AND b.status = :status")
-    fun findAllByEndDateAndStatus(currentDate: LocalDateTime, status: BoardStatus): List<Board>
-
-    //TODO 변환
     fun findAllByEndDateBeforeAndStatus(currentDate: LocalDateTime, status: BoardStatus) : List<Board>
 
     @Query("SELECT b FROM Board b LEFT JOIN FETCH b.boardTechStacks ts LEFT JOIN FETCH ts.techStack WHERE b.status != 'DELETED'")
     fun findAllWithTechStackByStatusNotDeleted(pageable: Pageable): Page<Board>
 
-    @Query("SELECT b FROM Board b WHERE b.boardId = :boardId AND b.status != 'DELETED'")
-    fun findByIdAndStatusNotDeleted(boardId: Long): Optional<Board>
+    fun findByBoardIdAndStatusNot(boardId: Long, status: BoardStatus = BoardStatus.DELETED) : Optional<Board>
 
-    //TODO 변환
-    fun findByBoardIdAndStatusNot(boardId: Long, status: BoardStatus = BoardStatus.DELETED)
-
-//    @Query("SELECT b FROM Board b WHERE b.jobPost.jobPostId = :jobPostId AND b.status != 'DELETED'")
-//    fun findAllByJobPostId(jobPostId: Long): List<Board>
+    @Query("SELECT b FROM Board b WHERE b.jobPost.jobPostId = :jobPostId AND b.status != 'DELETED'")
+    fun findAllByJobPostId(jobPostId: Long): List<Board>
 
     @Query("SELECT b FROM Board b WHERE b.createdAt BETWEEN :startOfWeek AND :endOfWeek AND b.views >= 500 AND b.status != 'DELETED'")
     fun findBoardsWithPopularTagCondition(startOfWeek: LocalDateTime, endOfWeek: LocalDateTime): List<Board>

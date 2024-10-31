@@ -6,6 +6,7 @@ import org.prgrms.devconnect.domain.Timestamp
 import org.prgrms.devconnect.domain.board.entity.constant.BoardCategory
 import org.prgrms.devconnect.domain.board.entity.constant.BoardStatus
 import org.prgrms.devconnect.domain.board.entity.constant.ProgressWay
+import org.prgrms.devconnect.domain.jobpost.entity.JobPost
 import org.prgrms.devconnect.domain.member.entity.Member
 import java.time.LocalDateTime
 
@@ -20,10 +21,9 @@ class Board(
     @JoinColumn(name = "member_id", nullable = false)
     val member: Member? = null,
 
-    // TODO 주석 삭제
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "job_post_id")
-//    private val jobPost:JobPost? = null,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_post_id")
+    private val jobPost:JobPost? = null,
 
     @Column(name = "title", length = 200)
     var title: String,
@@ -49,10 +49,10 @@ class Board(
     var endDate: LocalDateTime,
 
     @Column(name = "likes")
-    var likes: Int,
+    var likes: Int = 0,
 
     @Column(name = "views")
-    var views: Int,
+    var views: Int = 0,
 
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status", length = 50)
@@ -61,6 +61,7 @@ class Board(
     @OneToMany(mappedBy = "board", cascade = [CascadeType.PERSIST])
     var boardTechStacks: MutableList<BoardTechStackMapping> = mutableListOf()
 ) : Timestamp() {
+
     init {
         // 초기화 시점에서 boardTechStacks의 요소를 추가하는 로직
         boardTechStacks.forEach { addTechStack(it) }
