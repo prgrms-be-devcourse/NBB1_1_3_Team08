@@ -18,19 +18,14 @@ class ChatParticipation(
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     @JoinColumn(name = "member_id", nullable = false)
-    var member: Member? = null,
+    var member: Member,
 
     @OneToMany(mappedBy = "chatParticipation", fetch = FetchType.LAZY, cascade = [CascadeType.PERSIST])
     @JsonManagedReference
     var messages: MutableList<Message> = mutableListOf()
 ) {
     fun addMessage(message: Message) {
-        message.setChatParticipation(this)
+        message.chatParticipation = this
         messages.add(message)
-    }
-
-    // 연관관계 편의 메서드
-    fun setMember(member: Member?) {
-        this.member = member
     }
 }

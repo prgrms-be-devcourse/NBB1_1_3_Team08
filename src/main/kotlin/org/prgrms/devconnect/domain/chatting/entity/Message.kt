@@ -18,8 +18,4 @@ class Message(
     @Column(name = "content", columnDefinition = "TEXT")
     var content: String? = null,
 ) {
-    // 연관관계 편의 메서드
-    fun setChatParticipation(chatParticipation: ChatParticipation?) {
-        this.chatParticipation = chatParticipation
-    }
 }
