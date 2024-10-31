@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.prgrms.devconnect.api.controller.board.dto.request.BoardCreateRequestDto
 import org.prgrms.devconnect.api.controller.board.dto.request.BoardUpdateRequestDto
 import org.prgrms.devconnect.api.controller.board.dto.response.BoardResponseDto
 import org.prgrms.devconnect.api.service.Board.command.BoardCreateService
@@ -41,22 +42,21 @@ class BoardController(
     private val boardQueryService: BoardQueryService,
 ) {
 
-    //TODO 주석 삭제
-//    @PostMapping
-//    @Operation(summary = "게시물 생성", description = "새로운 게시물을 생성합니다.")
-//    @ApiResponses(
-//        value = [
-//            ApiResponse(responseCode = "201", description = "게시물 생성 성공"),
-//            ApiResponse(responseCode = "404", description = "엔티티 NOT FOUND")
-//        ]
-//    )
-//    fun createBoard(
-//        @RequestBody @Valid boardCreateRequestDto: BoardCreateRequestDto,
-//        @AuthenticationPrincipal member: Member
-//    ): ResponseEntity<Void> {
-//        boardCreateService.createBoard(boardCreateRequestDto, member.memberId)
-//        return ResponseEntity.status(HttpStatus.CREATED).build()
-//    }
+    @PostMapping
+    @Operation(summary = "게시물 생성", description = "새로운 게시물을 생성합니다.")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "201", description = "게시물 생성 성공"),
+            ApiResponse(responseCode = "404", description = "엔티티 NOT FOUND")
+        ]
+    )
+    fun createBoard(
+        @RequestBody @Valid boardCreateRequestDto: BoardCreateRequestDto,
+        @AuthenticationPrincipal member: Member
+    ): ResponseEntity<Void> {
+        boardCreateService.createBoard(boardCreateRequestDto, member.memberId!!)
+        return ResponseEntity.status(HttpStatus.CREATED).build()
+    }
 
     @DeleteMapping("/{boardId}")
     @Operation(summary = "게시물 삭제", description = "특정 게시물을 삭제합니다.", parameters = [
@@ -164,34 +164,33 @@ class BoardController(
         return ResponseEntity.status(HttpStatus.OK).body(popularBoards)
     }
 
-    //TODO 주석 삭제
-//    @GetMapping("/interests")
-//    @Operation(summary = "사용자 관심사 기반 게시물 조회", description = "특정 사용자의 관심사를 기반으로 추천 게시물을 조회합니다.")
-//    @ApiResponses(
-//        value = [
-//            ApiResponse(responseCode = "200", description = "게시물 조회 성공"),
-//            ApiResponse(responseCode = "404", description = "엔티티 NOT FOUND")
-//        ]
-//    )
-//    fun getBoardsByMemberInterests(@AuthenticationPrincipal member: Member): ResponseEntity<List<BoardResponseDto>> {
-//        val boards = boardQueryService.getBoardsByMemberInterests(member.memberId)
-//        return ResponseEntity.status(HttpStatus.OK).body(boards)
-//    }
-//
-//    @GetMapping("/jobpost/{jobPostId}")
-//    @Operation(summary = "특정 구직 공고와 연관된 게시물 조회", description = "특정 구직 공고와 연관된 게시물들을 조회합니다.", parameters = [
-//        Parameter(name = "jobPostId", description = "공고 ID", required = true, example = "1")
-//    ])
-//    @ApiResponses(
-//        value = [
-//            ApiResponse(responseCode = "200", description = "게시물 조회 성공"),
-//            ApiResponse(responseCode = "404", description = "엔티티 NOT FOUND")
-//        ]
-//    )
-//    fun getBoardsByJobPostId(@PathVariable jobPostId: Long): ResponseEntity<List<BoardResponseDto>> {
-//        val boards = boardQueryService.getBoardsByJobPostId(jobPostId)
-//        return ResponseEntity.status(HttpStatus.OK).body(boards)
-//    }
+    @GetMapping("/interests")
+    @Operation(summary = "사용자 관심사 기반 게시물 조회", description = "특정 사용자의 관심사를 기반으로 추천 게시물을 조회합니다.")
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "게시물 조회 성공"),
+            ApiResponse(responseCode = "404", description = "엔티티 NOT FOUND")
+        ]
+    )
+    fun getBoardsByMemberInterests(@AuthenticationPrincipal member: Member): ResponseEntity<List<BoardResponseDto>> {
+        val boards = boardQueryService.getBoardsByMemberInterests(member.memberId!!)
+        return ResponseEntity.status(HttpStatus.OK).body(boards)
+    }
+
+    @GetMapping("/jobpost/{jobPostId}")
+    @Operation(summary = "특정 구직 공고와 연관된 게시물 조회", description = "특정 구직 공고와 연관된 게시물들을 조회합니다.", parameters = [
+        Parameter(name = "jobPostId", description = "공고 ID", required = true, example = "1")
+    ])
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "게시물 조회 성공"),
+            ApiResponse(responseCode = "404", description = "엔티티 NOT FOUND")
+        ]
+    )
+    fun getBoardsByJobPostId(@PathVariable jobPostId: Long): ResponseEntity<List<BoardResponseDto>> {
+        val boards = boardQueryService.getBoardsByJobPostId(jobPostId)
+        return ResponseEntity.status(HttpStatus.OK).body(boards)
+    }
 
     @GetMapping("/popular-tag")
     @Operation(summary = "인기 태그 게시물 조회", description = "이번 주에 작성되고 조회수가 500 이상인 게시물을 조회합니다.")

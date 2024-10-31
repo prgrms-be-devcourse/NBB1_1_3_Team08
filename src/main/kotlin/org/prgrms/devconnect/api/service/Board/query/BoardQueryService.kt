@@ -2,6 +2,7 @@ package org.prgrms.devconnect.api.service.Board.query
 
 import org.prgrms.devconnect.api.controller.board.dto.request.BoardFilterDto
 import org.prgrms.devconnect.api.controller.board.dto.response.BoardResponseDto
+import org.prgrms.devconnect.api.service.member.MemberQueryService
 import org.prgrms.devconnect.common.exception.ExceptionCode
 import org.prgrms.devconnect.common.exception.board.BoardException
 import org.prgrms.devconnect.domain.board.entity.Board
@@ -10,6 +11,7 @@ import org.prgrms.devconnect.domain.board.entity.constant.BoardStatus
 import org.prgrms.devconnect.domain.board.entity.constant.ProgressWay
 import org.prgrms.devconnect.domain.board.repository.BoardRepository
 import org.prgrms.devconnect.domain.board.repository.CommentRepository
+import org.prgrms.devconnect.domain.jobpost.repository.JobPostRepository
 import org.prgrms.devconnect.domain.member.repository.MemberRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -22,13 +24,11 @@ import java.time.LocalDateTime
 @Transactional(readOnly = true)
 class BoardQueryService (
     private val boardRepository: BoardRepository ,
-    //TODO 주석 삭제
-//    private val memberRepository: MemberRepository,
-//    private val jobPostRepository: JobPostRepository
+    private val memberQueryService: MemberQueryService,
 ) {
 
     fun getBoardByIdOrThrow(boardId: Long): Board {
-        return boardRepository.findByIdAndStatusNotDeleted(boardId)
+        return boardRepository.findByBoardIdAndStatusNot(boardId)
             .orElseThrow { BoardException(ExceptionCode.NOT_FOUND_BOARD) }
     }
 
@@ -43,7 +43,7 @@ class BoardQueryService (
     }
 
     fun findAllByEndDateAndStatus(): List<Board> {
-        return boardRepository.findAllByEndDateAndStatus(LocalDateTime.now(), BoardStatus.RECRUITING)
+        return boardRepository.findAllByEndDateBeforeAndStatus(LocalDateTime.now(), BoardStatus.RECRUITING)
     }
 
     fun getBoardsByFilter(
@@ -80,19 +80,16 @@ class BoardQueryService (
         return boards?.map { BoardResponseDto.from(it) }
     }
 
-    //TODO 주석 삭제
-//    fun getBoardsByMemberInterests(memberId: Long): List<BoardResponseDto> {
-//        val memberTechStacks = memberQueryService.getTechStacksByMemberId(memberId)
-//        val boards = boardRepository.findAllByTechStacks(memberTechStacks)
-//        return boards.map { BoardResponseDto.from(it) }
-//    }
+    fun getBoardsByMemberInterests(memberId: Long): List<BoardResponseDto> {
+        val memberTechStacks = memberQueryService.getTechStacksByMemberId(memberId)
+        val boards = boardRepository.findAllByTechStacks(memberTechStacks)
+        return boards.map { BoardResponseDto.from(it) }
+    }
 
-    //TODO 주석 삭제
-//    fun getBoardsByJobPostId(jobPostId: Long): List<BoardResponseDto> {
-//        jobPostQueryService.getJobPostByIdOrThrow(jobPostId)
-//        val boards = boardRepository.findAllByJobPostId(jobPostId)
-//        return boards.map { BoardResponseDto.from(it) }
-//    }
+    fun getBoardsByJobPostId(jobPostId: Long): List<BoardResponseDto> {
+        val boards = boardRepository.findAllByJobPostId(jobPostId)
+        return boards.map { BoardResponseDto.from(it) }
+    }
 
     fun getBoardsWithPopularTagCondition(): List<BoardResponseDto> {
         val startOfWeek = LocalDateTime.now().with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay()

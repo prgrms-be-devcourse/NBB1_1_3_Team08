@@ -11,6 +11,7 @@ import org.prgrms.devconnect.domain.board.entity.Board
 import org.prgrms.devconnect.domain.board.entity.BoardTechStackMapping
 import org.prgrms.devconnect.domain.board.entity.constant.BoardCategory
 import org.prgrms.devconnect.domain.board.entity.constant.ProgressWay
+import org.prgrms.devconnect.domain.jobpost.entity.JobPost
 import org.prgrms.devconnect.domain.member.entity.Member
 import java.time.LocalDateTime
 
@@ -50,22 +51,6 @@ data class BoardCreateRequestDto(
 
     @ArraySchema(schema = Schema(description = "기술 스택 목록"))
     @field:NotEmpty(message = "적어도 하나 이상의 기술 스택을 선택해야 합니다.")
-    val techStackRequests: List<BoardTechStackRequestDto>
+    val techStackRequests: MutableList<BoardTechStackRequestDto>
 ) {
-
-    //TODO 주석 삭제
-//    fun toEntity(member: Member, jobPost: JobPost?, boardTechStacks: List<BoardTechStackMapping>): Board {
-//        return Board(
-//            member = member,
-//            jobPost = jobPost,
-//            title = title,
-//            content = content,
-//            category = category,
-//            recruitNum = recruitNum,
-//            progressWay = progressWay,
-//            progressPeriod = progressPeriod,
-//            endDate = endDate,
-//            boardTechStacks = boardTechStacks.toMutableList()
-//        )
-//    }
 }
