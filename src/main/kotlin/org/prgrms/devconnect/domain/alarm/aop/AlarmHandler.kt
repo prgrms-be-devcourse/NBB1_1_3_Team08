@@ -10,6 +10,7 @@ import org.prgrms.devconnect.domain.alarm.event.child.ReplyCommentEvent
 import org.prgrms.devconnect.domain.alarm.event.child.UrgentBoardEvent
 import org.prgrms.devconnect.domain.alarm.event.child.WelcomeEvent
 import org.prgrms.devconnect.domain.board.entity.Comment
+import org.prgrms.devconnect.domain.interest.entity.InterestBoard
 import org.prgrms.devconnect.domain.member.entity.Member
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component
@@ -24,13 +25,13 @@ class AlarmHandler(
 
         val result = proceedingJoinPoint.proceed()
         val methodName = proceedingJoinPoint.signature.name
+
         // TODO: 팩토리 메서드 패턴으로 리펙토링
-//        if ("findAllUrgentBoards" == methodName) {
-//            for (interestBoard in result as List<InterestBoard?>) {
-//                publisher.publishEvent(UrgentBoardEvent(interestBoard))
-//            }
-//        } else
-            if ("createComment" == methodName) {
+        if ("findAllUrgentBoards" == methodName) {
+            for (interestBoard in result as List<InterestBoard>) {
+                publisher.publishEvent(UrgentBoardEvent(interestBoard))
+            }
+        } else if ("createComment" == methodName) {
             val comment: Comment = result as Comment
             publisher.publishEvent(CommentEvent(comment))
             if (!comment.isRootComment()) {
