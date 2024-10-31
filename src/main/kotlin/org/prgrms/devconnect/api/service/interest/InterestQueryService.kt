@@ -4,6 +4,7 @@ import org.prgrms.devconnect.api.controller.interest.dto.response.InterestRespon
 import org.prgrms.devconnect.api.service.member.MemberQueryService
 import org.prgrms.devconnect.common.exception.ExceptionCode.*
 import org.prgrms.devconnect.common.exception.interest.InterestException
+import org.prgrms.devconnect.domain.alarm.aop.RegisterAlarmPublisher
 import org.prgrms.devconnect.domain.board.entity.Board
 import org.prgrms.devconnect.domain.interest.entity.InterestBoard
 import org.prgrms.devconnect.domain.interest.entity.InterestJobPost
@@ -11,6 +12,7 @@ import org.prgrms.devconnect.domain.interest.repository.InterestBoardRepository
 import org.prgrms.devconnect.domain.interest.repository.InterestJobPostRepository
 import org.prgrms.devconnect.domain.jobpost.entity.JobPost
 import org.prgrms.devconnect.domain.member.entity.Member
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.stream.Collectors
@@ -57,9 +59,8 @@ class InterestQueryService(
     }
   }
 
-  //  @Scheduled(cron = "0 0 0 * * *")
-  //  @RegisterPublisher
-  // TODO
+  @Scheduled(cron = "0 0 0 * * *")
+  @RegisterAlarmPublisher
   fun findAllUrgentBoards(): List<InterestBoard> {
     val allInterestBoards = interestBoardRepository.findAll()
     val urgentBoards = allInterestBoards.stream()
