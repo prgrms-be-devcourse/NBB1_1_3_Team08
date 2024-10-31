@@ -4,13 +4,13 @@ spring:
 
   config:
     activate:
-      on-profile: local
+      on-profile: external
 
   datasource:
-    url: ${LOCAL_DATABASE_URL}
-    username: ${LOCAL_DATABASE_USER}
-    password: ${LOCAL_DATABASE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${EXTERNAL_DATABASE_URL}
+    username: ${EXTERNAL_DATABASE_USER}
+    password: ${EXTERNAL_DATABASE_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:
     hibernate:
