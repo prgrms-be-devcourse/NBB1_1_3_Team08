@@ -16,6 +16,5 @@ class TechStack(
     @Column(name = "job_code", length = 50)
     val code: String
 ) {
-
-
+    constructor(name: String, code: String) : this(techStackId = null, name = name, code = code)
 }
