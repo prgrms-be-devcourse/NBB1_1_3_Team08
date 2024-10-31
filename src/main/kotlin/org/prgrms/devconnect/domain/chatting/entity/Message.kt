@@ -2,6 +2,7 @@ package org.prgrms.devconnect.domain.chatting.entity
 
 import com.fasterxml.jackson.annotation.JsonBackReference
 import jakarta.persistence.*
+import org.prgrms.devconnect.domain.CreateTimestamp
 
 @Entity
 @Table(name = "message")
@@ -17,5 +18,5 @@ class Message(
 
     @Column(name = "content", columnDefinition = "TEXT")
     var content: String? = null,
-) {
+) : CreateTimestamp() {
 }
