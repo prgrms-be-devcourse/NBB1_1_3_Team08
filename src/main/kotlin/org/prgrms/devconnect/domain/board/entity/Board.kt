@@ -59,18 +59,19 @@ class Board(
     var status: BoardStatus = BoardStatus.RECRUITING,
 
     @OneToMany(mappedBy = "board", cascade = [CascadeType.PERSIST])
-    var boardTechStacks: MutableList<BoardTechStackMapping> = mutableListOf()
+    var boardTechStacks: MutableList<BoardTechStackMapping> = mutableListOf(),
+
 ) : Timestamp() {
 
-    init {
-        // 초기화 시점에서 boardTechStacks의 요소를 추가하는 로직
-        boardTechStacks.forEach { addTechStack(it) }
-    }
+//    init {
+//        // 초기화 시점에서 boardTechStacks의 요소를 추가하는 로직
+//        boardTechStacks.forEach { addTechStack(it) }
+//    }
 
     // 연관관계 편의 메소드
     fun addTechStack(boardTechStack: BoardTechStackMapping) {
         boardTechStacks.add(boardTechStack)
-        boardTechStack.assignBoard(this)
+        boardTechStack.board = this
     }
 
     // Board의 상태를 변경하는 메소드

@@ -51,21 +51,6 @@ data class BoardCreateRequestDto(
 
     @ArraySchema(schema = Schema(description = "기술 스택 목록"))
     @field:NotEmpty(message = "적어도 하나 이상의 기술 스택을 선택해야 합니다.")
-    val techStackRequests: List<BoardTechStackRequestDto>
+    val techStackRequests: MutableList<BoardTechStackRequestDto>
 ) {
-
-    fun toEntity(member: Member, jobPost: JobPost?, boardTechStacks: List<BoardTechStackMapping>): Board {
-        return Board(
-            member = member,
-            jobPost = jobPost,
-            title = title,
-            content = content,
-            category = category,
-            recruitNum = recruitNum,
-            progressWay = progressWay,
-            progressPeriod = progressPeriod,
-            endDate = endDate,
-            boardTechStacks = boardTechStacks.toMutableList()
-        )
-    }
 }
