@@ -81,7 +81,7 @@ class JobPostController(
             @AuthenticationPrincipal member: Member
     ): ResponseEntity<Page<JobPostInfoResponseDto>> {
         memberQueryService.getMemberByIdOrThrow(member.memberId!!)
-        val jobPosts = jobPostQueryService.getJobPostsByMemberInterestsTechStack(member)
+        val jobPosts = jobPostQueryService.getJobPostsByMemberIdInterestsTechStack(member.memberId!!)
         return ResponseEntity.ok(jobPosts)
     }
 }
