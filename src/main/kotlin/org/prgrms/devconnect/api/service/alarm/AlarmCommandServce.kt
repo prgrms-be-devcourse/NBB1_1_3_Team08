@@ -36,14 +36,14 @@ class AlarmCommandService(
         return alarm
     }
 
-    fun deleteAlarmByAlarmIdAndMemberId(alarmId: Long, memberId: Long?) {
+    fun deleteAlarmByAlarmIdAndMemberId(alarmId: Long, memberId: Long) {
         alarmQueryService.getAlarmByAlarmIdAndMemberIdOrThrow(alarmId, memberId)
-        alarmRepository.deleteByAlarmIdAndMemberMemberId(alarmId, memberId!!)
+        alarmRepository.deleteByAlarmIdAndMemberMemberId(alarmId, memberId)
     }
 
-    fun deleteAlarmsByMemberId(memberId: Long?) {
+    fun deleteAlarmsByMemberId(memberId: Long) {
         alarmQueryService.getAlarmsByMemberIdOrThrow(memberId)
-        alarmRepository.deleteAllByMemberMemberId(memberId!!)
+        alarmRepository.deleteAllByMemberMemberId(memberId)
     }
 
     fun createCommentPostedMessageToBoardPoster(comment: Comment): Alarm {

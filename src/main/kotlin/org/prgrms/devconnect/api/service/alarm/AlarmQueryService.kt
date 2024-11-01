@@ -13,13 +13,14 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional(readOnly = true)
 class AlarmQueryService(
-    private val alarmRepository: AlarmRepository
+    private val alarmRepository: AlarmRepository,
+    private val memberQueryService: MemberQueryService
 ) {
 
-    private val memberQueryService: MemberQueryService? = null
 
-    fun getAlarmsByMemberIdOrThrow(memberId: Long?): AlarmsGetResponse {
-        val member: Member = memberQueryService!!.getMemberByIdOrThrow(memberId!!)
+
+    fun getAlarmsByMemberIdOrThrow(memberId: Long): AlarmsGetResponse {
+        val member: Member = memberQueryService.getMemberByIdOrThrow(memberId)
         val alarms: List<Alarm> = alarmRepository.findAllByMember(member)
         if (alarms.isEmpty()) {
             throw AlarmException(ExceptionCode.EMPTY_ALARMS)
@@ -36,7 +37,7 @@ class AlarmQueryService(
         }
     }
 
-    fun getUnReadAlarmsCountByMemberId(memberId: Long?): Int {
+    fun getUnReadAlarmsCountByMemberId(memberId: Long): Int {
         return alarmRepository.countUnreadAlarmsByMemberId(memberId)
     }
 }
