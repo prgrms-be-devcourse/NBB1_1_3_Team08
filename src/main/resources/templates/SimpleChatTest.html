@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Chat Application</title>
     <style>
+        /* 스타일 설정 */
         body {
             font-family: Arial, sans-serif;
             background-color: #f7f7f7;
@@ -15,7 +16,6 @@
             align-items: center;
             height: 100vh;
         }
-
         #chatContainer {
             display: none;
             width: 80%;
@@ -25,18 +25,15 @@
             border-radius: 10px;
             padding: 20px;
         }
-
         .container {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         h1, h3, h4 {
             text-align: center;
             color: #333;
         }
-
         input[type="text"] {
             width: 100%;
             padding: 10px;
@@ -44,7 +41,6 @@
             border-radius: 5px;
             border: 1px solid #ddd;
         }
-
         button {
             padding: 10px 20px;
             margin-top: 10px;
@@ -55,11 +51,9 @@
             border-radius: 5px;
             cursor: pointer;
         }
-
         button:hover {
             background-color: #218838;
         }
-
         .chat-room {
             background-color: #f1f1f1;
             border-radius: 5px;
@@ -68,21 +62,17 @@
             cursor: pointer;
             text-align: center;
         }
-
         .chat-room:hover {
             background-color: #e2e2e2;
         }
-
         #messageInput {
             width: calc(100% - 110px);
             float: left;
         }
-
         #currentChatRoomSection {
             margin-top: 20px;
             width: 100%;
         }
-
         #messages {
             max-height: 300px;
             overflow-y: auto;
@@ -92,21 +82,17 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
-
         .message {
             padding: 8px;
             border-bottom: 1px solid #ddd;
         }
-
         .input-section {
             display: flex;
         }
-
         .input-section button {
             width: 100px;
             margin-left: 10px;
         }
-
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
@@ -115,16 +101,16 @@
 <div class="container">
     <h1>Simple Chat Application</h1>
 
-    <!-- 로그인 섹션 -->
+    <!-- AccessToken 입력 섹션 -->
     <div id="loginSection">
-        <h3>Enter Member ID</h3>
-        <input type="text" id="memberIdInput" placeholder="Enter your Member ID" />
+        <h3>Enter Access Token</h3>
+        <input type="text" id="accessTokenInput" placeholder="Enter your Access Token" />
         <button onclick="login()">Login</button>
     </div>
 
     <!-- 채팅 기능 섹션 -->
     <div id="chatContainer">
-        <h3>Welcome, Member ID: <span id="currentMemberId"></span></h3>
+        <h3>Authenticated with AccessToken</h3>
 
         <!-- 채팅방 목록 -->
         <h4>Your Chat Rooms</h4>
@@ -156,7 +142,7 @@
 </div>
 
 <script type="text/javascript">
-    let memberId = null;
+    let accessToken = null;
     let stompClient = null;
     let currentRoomId = null;
     let chatPartId = null;
@@ -165,11 +151,10 @@
     let isLoading = false;
     let allMessagesLoaded = false;
 
-    // 간단 로그인 (Member ID 저장)
+    // 로그인 (AccessToken 저장)
     function login() {
-        memberId = document.getElementById('memberIdInput').value;
-        if (memberId) {
-            document.getElementById('currentMemberId').innerText = memberId;
+        accessToken = document.getElementById('accessTokenInput').value;
+        if (accessToken) {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('chatContainer').style.display = 'block';
             loadChatRooms();
@@ -178,10 +163,13 @@
 
     // 채팅방 목록 불러오기
     function loadChatRooms() {
-        fetch(`/api/v1/chat/member/${memberId}`)
+        fetch(`/api/v1/chat/member`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        })
             .then(response => response.json())
             .then(chatRooms => {
-                console.log(chatRooms);
                 const chatRoomContainer = document.getElementById('chatRooms');
                 chatRoomContainer.innerHTML = '';
                 chatRooms.forEach(chatRoom => {
@@ -206,9 +194,12 @@
             receiver_id: receiverId
         };
 
-        fetch(`/api/v1/chat/member/${memberId}`, {
+        fetch(`/api/v1/chat/member`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
             body: JSON.stringify(requestBody)
         })
             .then(response => response.json())
@@ -225,24 +216,26 @@
         document.getElementById('currentRoomId').innerText = roomId;
         document.getElementById('currentChatRoomSection').style.display = 'block';
         connectWebSocket(roomId);
-        currentPage = 0;  // 페이지 초기화
-        allMessagesLoaded = false;  // 모든 메시지 로드 상태 초기화
-        loadMessages(roomId, true);  // 첫 로딩 시 true 전달
+        currentPage = 0;
+        allMessagesLoaded = false;
+        loadMessages(roomId, true);
     }
 
     // 채팅방 참여
     function joinChatRoom() {
-        if (!currentRoomId || !memberId) {
-            alert('No room or member selected.');
+        if (!currentRoomId || !accessToken) {
+            alert('No room or token selected.');
             return;
         }
 
         const joinLeaveRequest = {
-            member_id: memberId,
             chatroom_id: currentRoomId
         };
 
-        stompClient.send("/app/chat/join", {}, JSON.stringify(joinLeaveRequest));
+        stompClient.send("/app/chat/join", {
+            'Authorization': `Bearer ${accessToken}`
+        }, JSON.stringify(joinLeaveRequest));
+
         alert('Joined chat room: ' + currentRoomId);
     }
 
@@ -253,10 +246,11 @@
             return;
         }
 
-        stompClient.send(`/app/chat/leave/${chatPartId}`, {}, JSON.stringify({}));
-        alert('Left chat room with chatPartId: ' + chatPartId);
+        stompClient.send(`/app/chat/leave/${chatPartId}`, {
+            'Authorization': `Bearer ${accessToken}`
+        }, JSON.stringify({}));
 
-        // 채팅방 UI 숨김 처리
+        alert('Left chat room with chatPartId: ' + chatPartId);
         document.getElementById('currentChatRoomSection').style.display = 'none';
     }
 
@@ -266,7 +260,6 @@
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function (frame) {
-            console.log('Connected to WebSocket');
             stompClient.subscribe(`/topic/room/${roomId}`, function (message) {
                 const messageBody = JSON.parse(message.body);
                 showMessage(messageBody);
@@ -276,43 +269,39 @@
 
     // 메시지 목록 불러오기 (스크롤 페이징 적용)
     function loadMessages(roomId, isInitialLoad = false) {
-        if (isLoading || allMessagesLoaded) return;  // 이미 로딩 중이거나 모든 메시지를 불러왔으면 중단
+        if (isLoading || allMessagesLoaded) return;
 
         isLoading = true;
 
-        fetch(`/api/v1/chat/rooms/${roomId}/messages?page=${currentPage}&size=${pageSize}`)
+        fetch(`/api/v1/chat/rooms/${roomId}/messages?page=${currentPage}&size=${pageSize}`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        })
             .then(response => response.json())
             .then(response => {
                 const messageContainer = document.getElementById('messages');
 
-                // 첫 로딩이면 메시지 컨테이너 초기화
                 if (isInitialLoad) {
                     messageContainer.innerHTML = '';
-                    messageContainer.scrollTop = messageContainer.scrollHeight;  // 가장 최근 메시지로 스크롤
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
                 }
 
-                // 메시지 추가
                 response.message_list.content.forEach(message => showMessageAtTop(message));
 
-                // 모든 메시지를 불러왔는지 확인
                 if (response.message_list.content.length < pageSize) {
                     allMessagesLoaded = true;
                 }
 
-                // 페이지 증가
                 currentPage++;
-
-                // 로딩 완료 상태로 변경
                 isLoading = false;
 
-                // 스크롤을 맨 아래로 유지 (최초 로딩 시)
                 if (isInitialLoad) {
                     messageContainer.scrollTop = messageContainer.scrollHeight;
                 }
             });
     }
 
-    // 메시지를 위로 추가 (과거 메시지 불러올 때)
     function showMessageAtTop(message) {
         const messageContainer = document.getElementById('messages');
         const messageElement = document.createElement('div');
@@ -321,7 +310,6 @@
         messageContainer.insertBefore(messageElement, messageContainer.firstChild);
     }
 
-    // 메시지 화면에 표시 및 자동 스크롤
     function showMessage(message) {
         const messageContainer = document.getElementById('messages');
         const messageElement = document.createElement('div');
@@ -329,19 +317,15 @@
         messageElement.innerText = `${message.nickname}: ${message.content} (${message.created_at})`;
         messageContainer.appendChild(messageElement);
 
-        // 메시지가 추가될 때 자동으로 스크롤 하단으로 이동
         messageContainer.scrollTop = messageContainer.scrollHeight;
     }
 
-    // 스크롤 이벤트 리스너 추가
     document.getElementById('messages').addEventListener('scroll', function() {
         if (this.scrollTop === 0 && !isLoading && !allMessagesLoaded) {
-            // 스크롤이 맨 위에 도달하면 이전 메시지를 불러옴
             loadMessages(currentRoomId);
         }
     });
 
-    // 메시지 전송
     function sendMessage() {
         const messageContent = document.getElementById('messageInput').value;
         if (messageContent && stompClient) {
@@ -349,7 +333,9 @@
                 chatpart_id: chatPartId,
                 content: messageContent
             };
-            stompClient.send(`/app/chat/${currentRoomId}`, {}, JSON.stringify(messageRequest));
+            stompClient.send(`/app/chat/${currentRoomId}`, {
+                'Authorization': `Bearer ${accessToken}`
+            }, JSON.stringify(messageRequest));
             document.getElementById('messageInput').value = '';
         }
     }
