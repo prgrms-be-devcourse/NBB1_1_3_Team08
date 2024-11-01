@@ -14,10 +14,12 @@ import org.prgrms.devconnect.api.service.chatting.command.ChattingCreateService
 import org.prgrms.devconnect.api.service.chatting.command.ChattingDeleteService
 import org.prgrms.devconnect.api.service.chatting.command.ChattingUpdateService
 import org.prgrms.devconnect.api.service.chatting.query.ChattingQueryService
+import org.prgrms.devconnect.domain.member.entity.Member
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -36,11 +38,9 @@ class ChattingController(
     private val chattingDeleteService: ChattingDeleteService,
 ) {
 
-    @PostMapping("/member/{memberId}")
+    @PostMapping("/member")
     @Operation(
-        summary = "새로운 채팅방 생성", description = "특정 사용자와의 새로운 채팅방 생성", parameters = [
-            Parameter(name = "memberId", description = "멤버 ID", required = true, example = "1")
-        ]
+        summary = "새로운 채팅방 생성", description = "특정 사용자와의 새로운 채팅방 생성"
     )
     @ApiResponses(
         value = [
@@ -49,18 +49,16 @@ class ChattingController(
         ]
     )
     fun createChatting(
-        @PathVariable("memberId") memberId: Long,
+        @AuthenticationPrincipal member: Member,
         @RequestBody @Valid request: ChatRoomRequest
     ): ResponseEntity<ChatPartResponse> {
-        val chatting = chattingCreateService.createNewChatting(memberId, request.receiverId)
+        val chatting = chattingCreateService.createNewChatting(member.memberId!!, request.receiverId)
         return ResponseEntity.status(HttpStatus.CREATED).body(chatting)
     }
 
-    @GetMapping("/member/{memberId}")
+    @GetMapping("/member")
     @Operation(
-        summary = "활성화된 채팅 방 조회", description = "멤버의 모든 활성화된 채팅 방을 조회", parameters = [
-            Parameter(name = "memberId", description = "멤버 ID", required = true, example = "1")
-        ]
+        summary = "활성화된 채팅 방 조회", description = "멤버의 모든 활성화된 채팅 방을 조회"
     )
     @ApiResponses(
         value = [
@@ -68,8 +66,8 @@ class ChattingController(
             ApiResponse(responseCode = "404", description = "엔티티 NOT FOUND")
         ]
     )
-    fun getChatRooms(@PathVariable("memberId") memberId: Long): ResponseEntity<List<ChatRoomListResponse>> {
-        val results = chattingQueryService.findAllActivateChattingsByMemberId(memberId)
+    fun getChatRooms(@AuthenticationPrincipal member: Member): ResponseEntity<List<ChatRoomListResponse>> {
+        val results = chattingQueryService.findAllActivateChattingsByMemberId(member.memberId!!)
         return ResponseEntity.status(HttpStatus.OK).body(results)
     }
 
