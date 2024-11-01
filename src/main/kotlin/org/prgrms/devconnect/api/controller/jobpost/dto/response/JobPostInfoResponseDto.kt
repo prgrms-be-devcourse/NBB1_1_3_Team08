@@ -25,10 +25,10 @@ data class JobPostInfoResponseDto(
         val companyName: String,
 
         @Schema(description = "회사 주소", example = "서울시 강남구 테헤란로 123")
-        val companyAddress: String,
+        val companyAddress: String? = "",
 
         @Schema(description = "회사 링크", example = "http://example.com")
-        val companyLink: String,
+        val companyLink: String? = "",
 
         @Schema(description = "게시 날짜", example = "2024-10-04T10:15:30")
         val postDate: LocalDateTime,

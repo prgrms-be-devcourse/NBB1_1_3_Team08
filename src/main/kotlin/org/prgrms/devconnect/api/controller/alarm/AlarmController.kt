@@ -31,14 +31,14 @@ class AlarmController(
     @GetMapping
     fun getAlarms(@AuthenticationPrincipal member: Member): ResponseEntity<AlarmsGetResponse> {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(alarmQueryService.getAlarmsByMemberIdOrThrow(member.memberId))
+            .body(alarmQueryService.getAlarmsByMemberIdOrThrow(member.memberId!!))
     }
 
     @Operation(summary = "알림 전체 삭제", description = "사용자 아이디별 수신된 모든 알림을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "수신된 전체 알림 목록을 성공적으로 삭제했습니다.")
     @DeleteMapping
     fun deleteAlarmsByMemberId(@AuthenticationPrincipal member: Member): ResponseEntity<Void> {
-        alarmCommandService.deleteAlarmsByMemberId(member.memberId)
+        alarmCommandService.deleteAlarmsByMemberId(member.memberId!!)
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
             .build()
     }
@@ -50,7 +50,7 @@ class AlarmController(
         @AuthenticationPrincipal member: Member,
         @PathVariable alarmId: Long
     ): ResponseEntity<Void> {
-        alarmCommandService.deleteAlarmByAlarmIdAndMemberId(alarmId, member.memberId)
+        alarmCommandService.deleteAlarmByAlarmIdAndMemberId(alarmId, member.memberId!!)
         return ResponseEntity.status(HttpStatus.NO_CONTENT)
             .build()
     }
@@ -65,6 +65,6 @@ class AlarmController(
     @GetMapping("/counts")
     fun getUnReadAlarmsCount(@AuthenticationPrincipal member: Member): ResponseEntity<Int> {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(alarmQueryService.getUnReadAlarmsCountByMemberId(member.memberId))
+            .body(alarmQueryService.getUnReadAlarmsCountByMemberId(member.memberId!!))
     }
 }
