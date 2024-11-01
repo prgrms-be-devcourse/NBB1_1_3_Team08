@@ -5,10 +5,12 @@ import org.prgrms.devconnect.api.controller.chatting.dto.request.MessageRequest
 import org.prgrms.devconnect.api.controller.chatting.dto.response.MessageResponse
 import org.prgrms.devconnect.api.service.chatting.command.ChattingCreateService
 import org.prgrms.devconnect.api.service.chatting.command.ChattingDeleteService
+import org.prgrms.devconnect.domain.member.entity.Member
 import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.simp.SimpMessagingTemplate
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.stereotype.Controller
 
 
@@ -29,9 +31,9 @@ class ChattingWebSocketController(
     }
 
     @MessageMapping("/chat/join")
-    fun joinChatRoom(joinRoomRequest: JoinRequest) {
+    fun joinChatRoom(@AuthenticationPrincipal member: Member, joinRoomRequest: JoinRequest) {
         // 사용자의 채팅방 참여 처리
-        chattingCreateService.joinChatRoom(joinRoomRequest.memberId, joinRoomRequest.chatroomId)
+        chattingCreateService.joinChatRoom(member.memberId!!, joinRoomRequest.chatroomId)
     }
 
     // 사용자가 채팅방을 나갈 때 처리하는 메서드
