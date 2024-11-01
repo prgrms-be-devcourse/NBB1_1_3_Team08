@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class JoinRequest(
-    @NotNull(message = "사용자 ID는 필수입니다")
-    val memberId: Long,
     @NotNull(message = "채팅방 ID는 필수입니다")
     val chatroomId: Long,
 )
