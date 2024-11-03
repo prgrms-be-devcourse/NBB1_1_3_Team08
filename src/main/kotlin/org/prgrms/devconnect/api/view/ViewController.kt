@@ -17,4 +17,11 @@ class ViewController {
 
   @GetMapping("/job-posts/{jobPostId}")
   fun jobPostDetail(@PathVariable jobPostId: String): String = "job-detail"
+
+  @GetMapping("/sign-up")
+  fun signUp(): String = "sign-up"
+
+  @GetMapping("/member-detail")
+  fun memberDetail(): String = "member-detail"
+
 }
