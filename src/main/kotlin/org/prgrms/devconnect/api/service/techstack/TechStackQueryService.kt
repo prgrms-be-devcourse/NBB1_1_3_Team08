@@ -35,4 +35,8 @@ class TechStackQueryService(
       TechStackResponseDto.from(it)
     }.toList()
   }
+
+  fun getAll(): List<TechStack> {
+    return techStackRepository.findAll();
+  }
 }

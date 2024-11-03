@@ -13,6 +13,6 @@ class JobPostRunner(
     // 애플리케이션 실행 시 호출되는 메서드
     @Throws(Exception::class)
     override fun run(args: ApplicationArguments?) {
-         // jobPostCommandService.saveJobPosts()
+//         jobPostCommandService.saveJobPosts()
     }
 }
