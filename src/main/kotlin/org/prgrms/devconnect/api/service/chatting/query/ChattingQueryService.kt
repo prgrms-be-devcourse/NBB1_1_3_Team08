@@ -1,5 +1,6 @@
 package org.prgrms.devconnect.api.service.chatting.query
 
+import org.prgrms.devconnect.api.controller.chatting.dto.response.ChatParticipationResponse
 import org.prgrms.devconnect.api.controller.chatting.dto.response.ChatRoomListResponse
 import org.prgrms.devconnect.api.controller.chatting.dto.response.MessageFullResponse
 import org.prgrms.devconnect.common.exception.ExceptionCode
@@ -33,5 +34,12 @@ class ChattingQueryService(
     fun getChatRoomById(chatroomId: Long): ChattingRoom {
         return chattingRoomRepository.findById(chatroomId)
             .orElseThrow { ChattingException(ExceptionCode.NOT_FOUND_CHATROOM) }
+    }
+
+    fun getParticipation(roomId: Long): ChatParticipationResponse {
+        val chatRoom = getChatRoomById(roomId)
+        val chatParticipation =
+            chatParticipationRepository.findAllByChattingRoomWithMember(chatRoom)
+        return ChatParticipationResponse.from(chatParticipation)
     }
 }
