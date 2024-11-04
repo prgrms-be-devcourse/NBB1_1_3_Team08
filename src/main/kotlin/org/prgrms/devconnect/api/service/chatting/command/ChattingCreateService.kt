@@ -6,6 +6,7 @@ import org.prgrms.devconnect.api.service.chatting.query.ChattingQueryService
 import org.prgrms.devconnect.api.service.member.MemberQueryService
 import org.prgrms.devconnect.common.exception.ExceptionCode
 import org.prgrms.devconnect.common.exception.chatting.ChattingException
+import org.prgrms.devconnect.domain.alarm.aop.RegisterAlarmPublisher
 import org.prgrms.devconnect.domain.chatting.entity.ChatParticipation
 import org.prgrms.devconnect.domain.chatting.entity.ChattingRoom
 import org.prgrms.devconnect.domain.chatting.entity.Message
@@ -13,6 +14,7 @@ import org.prgrms.devconnect.domain.chatting.entity.constant.ChattingRoomStatus
 import org.prgrms.devconnect.domain.chatting.repository.ChatParticipationRepository
 import org.prgrms.devconnect.domain.chatting.repository.ChattingRoomRepository
 import org.prgrms.devconnect.domain.chatting.repository.MessageRepository
+import org.prgrms.devconnect.domain.member.entity.Member
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -29,7 +31,8 @@ class ChattingCreateService(
       새로운 채팅방을 생성하는 서비스 코드
       1대1 대화를 시작할 때 필요한 사용자 2명의 ID를 가져와서 처리
     */
-    fun createNewChatting(sendMemberId: Long, receiveMemberId: Long): ChatPartResponse {
+    @RegisterAlarmPublisher
+    fun createNewChatting(sendMemberId: Long, receiveMemberId: Long): Member {
         val sender = memberQueryService.getMemberByIdOrThrow(sendMemberId)
         val receiver = memberQueryService.getMemberByIdOrThrow(receiveMemberId)
 
@@ -50,8 +53,7 @@ class ChattingCreateService(
         chatParticipationRepository.save(senderChatPart)
         chatParticipationRepository.save(receiverChatPart)
 
-        // chatpartId, roomId 반환
-        return ChatPartResponse(senderChatPart.chatPartId!!, chattingRoom.roomId!!)
+        return receiver
     }
 
     // 채팅방 참여 메서드
