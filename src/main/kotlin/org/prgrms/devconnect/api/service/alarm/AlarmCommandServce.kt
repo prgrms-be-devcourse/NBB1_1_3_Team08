@@ -102,4 +102,18 @@ class AlarmCommandService(
 
         return alarm
     }
+
+    fun createChatRoomCreateToReceiver(receiver: Member): Alarm {
+        val linkedPage = "";
+        val chatRoomCreateMessage = receiver.nickname + "님의 채팅 요청이 생성되었습니다."
+        val alarm = Alarm(
+            member = receiver,
+            alertText = chatRoomCreateMessage,
+            relatedUrl = linkedPage
+        )
+        alarmRepository.save(alarm)
+
+        return alarm
+    }
+
 }

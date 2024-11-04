@@ -5,10 +5,7 @@ import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
 import org.prgrms.devconnect.common.exception.ExceptionCode
 import org.prgrms.devconnect.common.exception.alarm.AlarmException
-import org.prgrms.devconnect.domain.alarm.event.child.CommentEvent
-import org.prgrms.devconnect.domain.alarm.event.child.ReplyCommentEvent
-import org.prgrms.devconnect.domain.alarm.event.child.UrgentBoardEvent
-import org.prgrms.devconnect.domain.alarm.event.child.WelcomeEvent
+import org.prgrms.devconnect.domain.alarm.event.child.*
 import org.prgrms.devconnect.domain.board.entity.Comment
 import org.prgrms.devconnect.domain.interest.entity.InterestBoard
 import org.prgrms.devconnect.domain.member.entity.Member
@@ -39,6 +36,8 @@ class AlarmHandler(
             }
         } else if ("createMember" == methodName) {
             publisher.publishEvent(WelcomeEvent(result as Member))
+        } else if ("createNewChatting" == methodName) {
+            publisher.publishEvent(ChatRoomCreateEvent(result as Member))
         }
         else throw AlarmException(ExceptionCode.NOT_FOUND_ALARM)
         return result

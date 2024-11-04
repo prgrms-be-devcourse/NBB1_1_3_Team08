@@ -52,9 +52,9 @@ class ChattingController(
   fun createChatting(
     @AuthenticationPrincipal member: Member,
     @RequestBody @Valid request: ChatRoomRequest
-  ): ResponseEntity<ChatPartResponse> {
+  ): ResponseEntity<Void> {
     val chatting = chattingCreateService.createNewChatting(member.memberId!!, request.receiverId)
-    return ResponseEntity.status(HttpStatus.CREATED).body(chatting)
+    return ResponseEntity.status(HttpStatus.CREATED).build()
   }
 
   @GetMapping("/member")
