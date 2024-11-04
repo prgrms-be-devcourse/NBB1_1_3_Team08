@@ -24,4 +24,9 @@ class ViewController {
   @GetMapping("/member-detail")
   fun memberDetail(): String = "member-detail"
 
+  @GetMapping("/board-create/{jobPostId}")
+  fun createBoard(@PathVariable(required = false) jobPostId: String): String = "board-create"
+
+  @GetMapping("/my-chat-room")
+  fun myChatRoom(): String = "my-chat-room"
 }

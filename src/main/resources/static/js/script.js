@@ -255,6 +255,8 @@ async function initialize() {
     document.getElementById('userContent').style.display = 'block';
     document.getElementById('myInfo').style.display = 'block';
     document.getElementById('notificationItem').style.display = 'block';
+    document.getElementById('myChatRoom').style.display = 'block';
+
   } else {
     document.getElementById('guestContent').style.display = 'block';
     document.getElementById('loginItem').style.display = 'block';

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>채팅방 목록</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+
+    #chatRoomsContainer {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .chat-room {
+      padding: 15px;
+      margin: 10px 0;
+      background-color: #e7e7e7;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-room:hover {
+      background-color: #d5d5d5;
+    }
+
+    .participants {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    .no-participants {
+      font-style: italic;
+      color: #aaa;
+    }
+
+    /* 모달 스타일 */
+    #chatModal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #messages {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+
+    .message {
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+
+    .message.sent {
+      background-color: #dcf8c6; /* 본인의 메시지 배경색 */
+      align-self: flex-end; /* 오른쪽 정렬 */
+    }
+
+    .message.received {
+      background-color: #ffffff; /* 상대방의 메시지 배경색 */
+      align-self: flex-start; /* 왼쪽 정렬 */
+    }
+
+    .input-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    #messageInput {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-right: 10px;
+    }
+
+    #sendMessageButton {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #sendMessageButton:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+<div id="chatRoomsContainer">
+  <h1>참여 중인 채팅방</h1>
+  <div id="chatRooms"></div>
+</div>
+
+<!-- 모달 -->
+<div id="chatModal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>채팅방</h2>
+    <div id="modalParticipants"></div>
+    <div id="messages"></div>
+    <div class="input-container">
+      <input type="text" id="messageInput" placeholder="메시지 입력..." />
+      <button id="sendMessageButton">전송</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+  let stompClient = null;
+  let currentRoomId = null;
+  let chatPartId = null;
+  let isLoading = false;
+  let allMessagesLoaded = false;
+  let currentPage = 0;
+  const pageSize = 10;
+  const accessToken = localStorage.getItem('token'); // 로컬 스토리지에서 토큰 가져오기
+  let memberId = null; // 본인 ID 가져오기
+
+  function loadChatRooms() {
+    fetch(`/api/v1/chat/member`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+    .then(response => response.json())
+    .then(chatRooms => {
+      const chatRoomContainer = document.getElementById('chatRooms');
+      chatRoomContainer.innerHTML = '';
+      chatRooms.forEach(chatRoom => {
+        const chatRoomElement = document.createElement('div');
+        chatRoomElement.className = 'chat-room';
+        memberId = chatRoom.member_id;
+        chatRoomElement.innerHTML = `
+            <div class="participants loading" id="participants-${chatRoom.room_id}">참여자 불러오는 중...</div>
+          `;
+        chatRoomElement.onclick = () => openChatRoom(chatRoom.room_id, chatRoom.chatpart_id);
+        chatRoomContainer.appendChild(chatRoomElement);
+
+        loadParticipants(chatRoom.room_id);
+      });
+    })
+    .catch(error => {
+      console.error('채팅방 목록을 불러오는 중 오류 발생:', error);
+      alert('채팅방을 불러오는 데 실패했습니다. 나중에 다시 시도하세요.');
+    });
+  }
+
+  function loadParticipants(roomId) {
+    fetch(`/api/v1/chat/rooms/${roomId}/participation`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      const participantsElement = document.getElementById(`participants-${roomId}`);
+      participantsElement.innerText = `참여자: ${data.participations.join(', ') || '참여자 없음'}`;
+      if (!data.participations.length) {
+        participantsElement.classList.add('no-participants');
+      } else {
+        participantsElement.classList.remove('no-participants');
+      }
+    })
+    .catch(error => {
+      console.error('참여자 정보를 불러오는 중 오류 발생:', error);
+    });
+  }
+
+  function openChatRoom(roomId, partId) {
+    currentRoomId = roomId;
+    chatPartId = partId;
+    document.getElementById('modalParticipants').innerText = `방 ID: ${roomId}`;
+    document.getElementById('messages').innerHTML = ''; // 메시지 초기화
+    document.getElementById('chatModal').style.display = "flex"; // 모달 보이기
+    connectWebSocket(roomId);
+    currentPage = 0;
+    allMessagesLoaded = false;
+    loadMessages(roomId, true);
+  }
+
+  function connectWebSocket(roomId) {
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+      stompClient.subscribe(`/topic/room/${roomId}`, function (message) {
+        const messageBody = JSON.parse(message.body);
+        showMessage(messageBody);
+      });
+    });
+  }
+
+  function loadMessages(roomId, isInitialLoad = false) {
+    if (isLoading || allMessagesLoaded) return;
+
+    isLoading = true;
+
+    fetch(`/api/v1/chat/rooms/${roomId}/messages?page=${currentPage}&size=${pageSize}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    })
+    .then(response => response.json())
+    .then(response => {
+      const messageContainer = document.getElementById('messages');
+
+      if (isInitialLoad) {
+        messageContainer.innerHTML = '';
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }
+
+      response.message_list.content.forEach(message => showMessageAtTop(message));
+
+      if (response.message_list.content.length < pageSize) {
+        allMessagesLoaded = true;
+      }
+
+      currentPage++;
+      isLoading = false;
+
+      if (isInitialLoad) {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }
+    });
+  }
+
+  function formatDate(dateString) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', options).replace(',', ''); // ','를 제거하여 한국어 형식에 맞추기
+  }
+
+  function showMessage(message) {
+    const messageContainer = document.getElementById('messages');
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message';
+
+    if (message.sender_id === memberId) {
+      messageElement.classList.add('sent'); // 본인의 메시지
+      messageElement.innerText = `나: ${message.content} (${formatDate(message.created_at)})`;
+    } else {
+      messageElement.classList.add('received'); // 상대방의 메시지
+      messageElement.innerText = `${message.nickname}: ${message.content} (${formatDate(message.created_at)})`;
+    }
+
+
+    messageContainer.appendChild(messageElement);
+    messageContainer.scrollTop = messageContainer.scrollHeight; // 새로운 메시지 추가 후 스크롤 하단으로 이동
+  }
+
+  function showMessageAtTop(message) {
+    const messageContainer = document.getElementById('messages');
+    const messageElement = document.createElement('div');
+    messageElement.className = 'message';
+
+    if (message.sender_id === memberId) {
+      messageElement.classList.add('sent'); // 본인의 메시지
+      messageElement.innerText = `나: ${message.content} (${formatDate(message.created_at)})`;
+    } else {
+      messageElement.classList.add('received'); // 상대방 메시지
+      messageElement.innerText = `${message.nickname}: ${message.content} (${formatDate(message.created_at)})`;
+    }
+
+    messageContainer.appendChild(messageElement);
+  }
+
+  document.getElementById('sendMessageButton').onclick = function() {
+    sendMessage();
+  };
+
+  function sendMessage() {
+    const messageContent = document.getElementById('messageInput').value;
+    if (messageContent && stompClient) {
+      const messageRequest = {
+        chatpart_id: chatPartId,
+        content: messageContent
+      };
+      stompClient.send(`/app/chat/${currentRoomId}`, {
+        'Authorization': `Bearer ${accessToken}`
+      }, JSON.stringify(messageRequest));
+      document.getElementById('messageInput').value = ''; // 입력 필드 비우기
+      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight; // 스크롤 하단으로 이동
+    }
+  }
+
+  document.querySelector('.close').onclick = function() {
+    closeChatModal();
+  }
+
+  function closeChatModal() {
+    document.getElementById('chatModal').style.display = "none";
+    if (stompClient) {
+      stompClient.disconnect();
+      stompClient = null; // 연결 상태 초기화
+    }
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('chatModal');
+    if (event.target == modal) {
+      closeChatModal();
+    }
+  }
+
+  // 페이지 로드 시 채팅방 목록을 불러옵니다.
+  document.addEventListener('DOMContentLoaded', loadChatRooms);
+</script>
+</body>
+</html>

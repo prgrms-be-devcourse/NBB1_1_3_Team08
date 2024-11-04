@@ -34,6 +34,7 @@
   </style>
 </head>
 <body>
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
     <a class="navbar-brand" href="#">DevConnect</a>
@@ -92,9 +93,11 @@
     </div>
   </div>
 
-  <h5 class="mt-4">스터디 리스트</h5>
+  <div class="d-flex align-items-center justify-content-between mt-4">
+    <h5>해당 공고에 대한 스터디 리스트</h5>
+    <a href="/board-create/1" id="createStudyLink" class="btn btn-secondary">스터디 만들기</a>
+  </div>
   <div id="studyList" class="mb-4"></div>
-
 </div>
 
 <footer>
@@ -161,9 +164,7 @@
 
   async function fetchDataWithToken(url, token) {
     const response = await axios.get(url, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+      headers: { 'Authorization': `Bearer ${token}` }
     });
     return response.data;
   }
@@ -176,6 +177,7 @@
         isLogin = true;
         document.getElementById('welcomeText').innerText = `환영합니다, ${userData.nickname}님!`;
 
+        // 유저 정보 업데이트
         document.getElementById('userNickname').innerText = `닉네임: ${userData.nickname}`;
         document.getElementById('userEmail').innerText = `이메일: ${userData.email}`;
         document.getElementById('userJob').innerText = `직업: ${userData.job}`;
@@ -197,9 +199,7 @@
     if (token) {
       try {
         await axios.post('/api/v1/members/logout', {}, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         localStorage.removeItem('token');
         window.location.href = '/';
@@ -219,7 +219,7 @@
     const token = localStorage.getItem('token');
     if (token) {
       try {
-        const {count, alarms} = await fetchDataWithToken('/api/v1/alarms', token);
+        const { count, alarms } = await fetchDataWithToken('/api/v1/alarms', token);
         document.getElementById('notificationCount').innerText = count;
         renderNotifications(alarms);
       } catch (error) {
@@ -230,17 +230,13 @@
 
   function renderNotifications(alarms) {
     const notificationContent = document.getElementById('notificationContent');
-    notificationContent.innerHTML = '';
+    notificationContent.innerHTML = alarms.length === 0 ? '<p>새 알림이 없습니다.</p>' : '';
 
-    if (alarms.length === 0) {
-      notificationContent.innerHTML = '<p>새 알림이 없습니다.</p>';
-    } else {
-      alarms.forEach(alarm => {
-        const notificationItem = document.createElement('p');
-        notificationItem.innerText = `${alarm.sender}: ${alarm.content}`;
-        notificationContent.appendChild(notificationItem);
-      });
-    }
+    alarms.forEach(alarm => {
+      const notificationItem = document.createElement('p');
+      notificationItem.innerText = `${alarm.sender}: ${alarm.content}`;
+      notificationContent.appendChild(notificationItem);
+    });
   }
 
   async function fetchJobPost() {
@@ -262,6 +258,7 @@
 
       const techStacksList = document.getElementById('techStacks');
       techStacksList.innerHTML = ''; // Clear previous items
+
       jobPost.tech_stacks.forEach(stack => {
         const listItem = document.createElement('li');
         listItem.className = 'list-group-item';
@@ -270,6 +267,7 @@
       });
 
       document.getElementById('companyLink').href = jobPost.company_link;
+      document.getElementById('createStudyLink').href = `/board-create/${jobPostId}`;
 
     } catch (error) {
       console.error('채용공고 로드 실패:', error);
@@ -281,9 +279,7 @@
     const jobPostId = window.location.pathname.split('/').pop();
     try {
       const response = await axios.get(`http://localhost:8080/api/v1/boards/jobpost/${jobPostId}`);
-      const studyList = response.data;
-
-      renderStudyList(studyList);
+      renderStudyList(response.data);
     } catch (error) {
       console.error('스터디 리스트 로드 실패:', error);
     }
@@ -291,15 +287,12 @@
 
   function renderStudyList(studyList) {
     const studyContainer = document.getElementById('studyList');
-    studyContainer.innerHTML = ''; // Clear previous items
+    studyContainer.innerHTML = studyList.length === 0 ? '<p>스터디가 없습니다.</p>' : '';
 
-    if (studyList.length === 0) {
-      studyContainer.innerHTML = '<p>스터디가 없습니다.</p>';
-    } else {
-      studyList.forEach(study => {
-        const studyItem = document.createElement('div');
-        studyItem.className = 'card mb-3';
-        studyItem.innerHTML = `
+    studyList.forEach(study => {
+      const studyItem = document.createElement('div');
+      studyItem.className = 'card mb-3';
+      studyItem.innerHTML = `
         <div class="card-body">
           <h5 class="card-title">${study.title}</h5>
           <p class="card-text">${study.content}</p>
@@ -309,9 +302,8 @@
           <a href="/boards/${study.board_id}" class="btn btn-primary">스터디 상세보기</a>
         </div>
       `;
-        studyContainer.appendChild(studyItem);
-      });
-    }
+      studyContainer.appendChild(studyItem);
+    });
   }
 
   async function initialize() {
