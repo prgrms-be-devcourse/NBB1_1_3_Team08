@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>회원가입</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+  <h2>회원가입</h2>
+  <form id="signupForm">
+    <div class="mb-3">
+      <label for="email" class="form-label">이메일</label>
+      <input type="email" class="form-control" id="email" required>
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">비밀번호</label>
+      <input type="password" class="form-control" id="password" required>
+    </div>
+    <div class="mb-3">
+      <label for="nickname" class="form-label">닉네임</label>
+      <input type="text" class="form-control" id="nickname" required>
+    </div>
+    <div class="mb-3">
+      <label for="job" class="form-label">직업</label>
+      <input type="text" class="form-control" id="job" required>
+    </div>
+    <div class="mb-3">
+      <label for="affiliation" class="form-label">소속</label>
+      <input type="text" class="form-control" id="affiliation">
+    </div>
+    <div class="mb-3">
+      <label for="career" class="form-label">경력 (년)</label>
+      <input type="number" class="form-control" id="career" min="0" required>
+    </div>
+    <div class="mb-3">
+      <label for="selfIntroduction" class="form-label">자기소개</label>
+      <textarea class="form-control" id="selfIntroduction" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+      <label for="githubLink" class="form-label">GitHub 링크</label>
+      <input type="url" class="form-control" id="githubLink">
+    </div>
+    <div class="mb-3">
+      <label for="blogLink" class="form-label">블로그 링크</label>
+      <input type="url" class="form-control" id="blogLink">
+    </div>
+    <div class="mb-3">
+      <label for="interest" class="form-label">관심 분야</label>
+      <select class="form-select" id="interest">
+        <option value="TEAM_PROJECT">팀 프로젝트</option>
+        <option value="STUDY">스터디</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="techStackIds" class="form-label">기술 스택</label>
+      <small class="form-text text-muted">여러 개의 기술 스택을 선택할 수 있습니다.</small>
+      <select multiple class="form-select" id="techStackIds" required>
+        <!-- 기술 스택은 JavaScript로 동적으로 추가될 예정입니다. -->
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">가입하기</button>
+    <div id="message" class="mt-3"></div>
+  </form>
+</div>
+
+<script>
+  async function loadTechStacks() {
+    try {
+      const response = await axios.get('http://localhost:8080/api/v1/tech-stacks');
+      const techStacks = response.data;
+
+      const techStackSelect = document.getElementById('techStackIds');
+      techStacks.forEach(stack => {
+        const option = document.createElement('option');
+        option.value = stack.tech_stack_id;  // tech_stack_id
+        option.textContent = stack.name;  // 기술 스택 이름
+        techStackSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error('기술 스택을 로드하는데 실패했습니다:', error);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadTechStacks);
+
+  document.getElementById('signupForm').addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const signupData = {
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value,
+      nickname: document.getElementById('nickname').value,
+      job: document.getElementById('job').value,
+      affiliation: document.getElementById('affiliation').value,
+      career: parseInt(document.getElementById('career').value),
+      self_introduction: document.getElementById('selfIntroduction').value,
+      github_link: document.getElementById('githubLink').value,
+      blog_link: document.getElementById('blogLink').value,
+      interest: document.getElementById('interest').value,
+      tech_stack_ids: Array.from(document.getElementById('techStackIds').selectedOptions).map(option => parseInt(option.value))
+    };
+
+    try {
+      const response = await axios.post('/api/v1/members/signup', signupData);
+      alert('회원가입 성공!');  // 알림창
+      window.location.href = '/';  // 메인 페이지로 리다이렉트
+    } catch (error) {
+      document.getElementById('message').innerText = '회원가입 실패: ' + (error.response?.data?.message || '알 수 없는 오류');
+    }
+  });
+</script>
+</body>
+</html>
